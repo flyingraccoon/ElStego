@@ -1,23 +1,36 @@
-import wave
+import wave,time
 dicts = {}
 frames = []
+chrs = []
 word = 'Hello World!'
 w = wave.open(r'\\ops.internal\Users\Students-KS4\2014 Year Group\14JDenham\Project\wav.wav', 'r')
-for letter in word:
-    for i in range(w.getnframes()):
+n_channels = w.getnchannels()      # Number of channels. (1=Mono, 2=Stereo).
+sample_width = w.getsampwidth()    # Sample width in bytes.
+framerate = w.getframerate()       # Frame rate.
+n_frames = w.getnframes()          # Number of frames.
+comp_type = w.getcomptype()        # Compression type (only supports "NONE").
+comp_name = w.getcompname() 
+for i in range(w.getnframes()):
         ### read 1 frame and the position will updated ###
         frame = w.readframes(1)
-            
-        for j in range(len(frame)):
-            if frame[j] == ord(letter):
-                dicts[chr(frame[j])] = (i,j)
-print(dicts)
-#dicts = dict(sorted(dicts.items(), key=lambda item: item[1]))
-import matplotlib.pyplot as plt
-#print(dicts)
-'''
-plt.bar(range(len(dicts)), list(dicts.values()), align='center')
-plt.xticks(range(len(dicts)), list(dicts.keys()))
-
-plt.show()
-'''
+        frames.append(frame)
+print('here')
+framenum = 0
+smallframenum = 0
+for frame in frames:
+    smallframenum = 0
+    for smallframe in frame:
+        chrs.append((chr(smallframe),framenum,smallframenum))
+        smallframenum +=1
+    framenum+=1    
+print('here2')
+for letter in word:
+    for pos in chrs:
+        if pos[0] == letter:
+            print(pos)
+            break
+print(frames)
+with wave.open(r'\\ops.internal\Users\Students-KS4\2014 Year Group\14JDenham\Project\outwav.wav', 'wb') as wav_file:
+    params = (n_channels, sample_width, framerate, n_frames, comp_type, comp_name)
+    wav_file.setparams(params)
+    wav_file.writeframes(b''.join(frames))
